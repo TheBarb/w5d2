@@ -12,8 +12,13 @@ router.get('/books', (req, res) => {
   })
 });
 
-router.get('/books/add', (req, res) => {
-  res.render('bookForm');
+router.get('/books/add', (req, res, next) => {
+  Author.find()
+    .then(authorsFromDB => {
+      res.render('bookForm', { authors: authorsFromDB });
+    }).catch(error => {
+      next(error);
+    })
 });
 
 router.get('/books/:bookId', (req, res) => {
@@ -49,7 +54,9 @@ router.post('/books', (req, res) => {
 router.get('/books/edit/:bookId', (req, res, next) => {
   const id = req.params.bookId;
   console.log(id);
+
   Book.findById(id)
+    .populate('author')
     .then(bookFromDB => {
       // render an edit form with the data from the book
       console.log(bookFromDB);
