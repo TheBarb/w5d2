@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
+const Author = require('../models/Author');
 
 router.get('/books', (req, res) => {
   // get all the books
@@ -17,10 +18,12 @@ router.get('/books/add', (req, res) => {
 
 router.get('/books/:bookId', (req, res) => {
   const id = req.params.bookId;
-  Book.findById(id).then(bookFromDB => {
-    console.log(bookFromDB);
-    res.render('bookDetails', { book: bookFromDB });
-  });
+  Book.findById(id)
+    .populate('author')
+    .then(bookFromDB => {
+      console.log(bookFromDB);
+      res.render('bookDetails', { book: bookFromDB });
+    });
 });
 
 router.post('/books', (req, res) => {
@@ -83,6 +86,23 @@ router.post('/books/edit/:bookId', (req, res) => {
     .catch(error => {
       console.log(error);
     });
+});
+
+router.post('/books/:bookId/reviews', (req, res, next) => {
+  const { user, comments } = req.body;
+  // const user = req.body.user;
+  Book.findByIdAndUpdate(req.params.bookId, {
+    $push: {
+      reviews: {
+        user: user,
+        comments: comments
+      }
+    }
+  }).then(book => {
+    res.redirect(`/books/${book._id}`)
+  }).catch(error => {
+    next(error);
+  })
 });
 
 module.exports = router;

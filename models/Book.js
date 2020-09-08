@@ -7,6 +7,12 @@ const bookSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Author' // 'Author is the name of the model 
   },
+  reviews: [
+    {
+      user: String,
+      comments: String
+    }
+  ],
   rating: Number
 });
 
